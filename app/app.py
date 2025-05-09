@@ -29,7 +29,7 @@ if st.button("🔍 Generate Explanation"):
         with st.spinner("Analyzing code..."):
             input_text = f"summarize: {code}"
             inputs = tokenizer(input_text, return_tensors="pt", truncation=True, max_length=512)
-            outputs = model.generate(**inputs, max_new_tokens=150)
+            outputs = model.generate(**inputs, max_new_tokens=200)
             explanation = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         st.subheader("🧾 Explanation")
