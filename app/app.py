@@ -27,10 +27,18 @@ if st.button("🔍 Generate Explanation"):
         st.warning("Please paste some code first.")
     else:
         with st.spinner("Analyzing code..."):
-            input_text = f"summarize: {code}"
-            inputs = tokenizer(input_text, return_tensors="pt", truncation=True, max_length=512)
-            outputs = model.generate(**inputs, max_new_tokens=200)
-            explanation = tokenizer.decode(outputs[0], skip_special_tokens=True)
+            try:
+                # Preprocess code if it exceeds the model's max input length (512 tokens)
+                input_text = f"Explain this Python code: {code}"
+                inputs = tokenizer(input_text, return_tensors="pt", truncation=True, max_length=512, padding=True)
+                
+                # Generate explanation
+                outputs = model.generate(**inputs, max_new_tokens=300, num_beams=5, length_penalty=2.0)
+                explanation = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
-        st.subheader("🧾 Explanation")
-        st.write(explanation)
+                # Display the explanation
+                st.subheader("🧾 Explanation")
+                st.write(explanation)
+
+            except Exception as e:
+                st.error(f"An error occurred: {str(e)}")
