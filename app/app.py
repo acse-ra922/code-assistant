@@ -1,25 +1,24 @@
 import streamlit as st
 from transformers import pipeline
 
-st.set_page_config(page_title="Local Code Explainer")
+st.title("🧠 Code Explainer Assistant")
+st.write("Paste your Python code below and get an explanation of complex sections.")
 
-st.title("Local Code Explainer (Free & Fast)")
+code = st.text_area("Your Python Code", height=300)
 
-code = st.text_area("Paste your code here:", height=300)
-task = st.selectbox("Select Task", ["Explain Code"])  # You can add more later
+if code:
+    with st.spinner("Analyzing code..."):
+        prompt = (
+            "You are an expert Python teacher. Explain the complex parts of the following code "
+            "so a beginner can understand:\n\n"
+            f"{code}\n\n"
+            "Focus on logic, non-obvious steps, and advanced constructs."
+        )
 
-@st.cache_resource
-def load_model():
-    return pipeline("text2text-generation", model="google/flan-t5-base")
+        generator = pipeline("text-generation", model="mistralai/Mistral-7B-Instruct-v0.1", device_map="auto")
 
-model = load_model()
+        output = generator(prompt, max_new_tokens=512, do_sample=True, temperature=0.7)
+        explanation = output[0]["generated_text"].split(prompt)[-1].strip()
 
-if st.button("Run"):
-    if not code.strip():
-        st.warning("Please enter some code.")
-    else:
-        prompt = f"Explain the following Python code in simple terms:\n\n{code}"
-        with st.spinner("Generating explanation..."):
-            response = model(prompt, max_length=512, do_sample=False)
-        st.subheader("Explanation:")
-        st.write(response[0]['generated_text'])
+        st.subheader("🧾 Explanation")
+        st.write(explanation)
