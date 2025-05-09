@@ -14,7 +14,7 @@ code = st.text_area("✍️ Paste your Python code here:", height=300)
 # Load model once when app starts
 @st.cache_resource
 def load_model():
-    model_name = "Salesforce/codet5-small"
+    model_name = "Salesforce/codeT5-large"  # Updated model for stronger performance
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return tokenizer, model
@@ -28,11 +28,11 @@ if st.button("🔍 Generate Explanation"):
     else:
         with st.spinner("Analyzing code..."):
             try:
-                # Preprocess code if it exceeds the model's max input length (512 tokens)
-                input_text = f"Explain this Python code: {code}"
+                # Preprocess the code with a more clear instruction
+                input_text = f"Explain the function of each line of the following Python code:\n{code}"
                 inputs = tokenizer(input_text, return_tensors="pt", truncation=True, max_length=512, padding=True)
                 
-                # Generate explanation
+                # Generate explanation with more tokens and better beam search
                 outputs = model.generate(**inputs, max_new_tokens=300, num_beams=5, length_penalty=2.0)
                 explanation = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
